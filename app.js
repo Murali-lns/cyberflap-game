@@ -686,6 +686,7 @@ function triggerGameOver() {
   document.getElementById('summary-score').textContent = gameScore;
   document.getElementById('summary-best').textContent = stats.highScore;
   document.getElementById('btn-pause').disabled = true;
+  updateUIState();
 
   // Verify and unlock badges
   unlockAchievement('firstFlight', 'First Flight');
@@ -1462,12 +1463,14 @@ function startGameplay() {
   document.getElementById('screen-start').classList.add('hidden');
   document.getElementById('screen-gameover').classList.add('hidden');
   document.getElementById('btn-pause').disabled = false;
+  updateUIState();
 }
 
 function pauseGame() {
   if (gameState !== 'PLAYING') return;
   gameState = 'PAUSED';
   document.getElementById('screen-pause').classList.remove('hidden');
+  updateUIState();
 }
 
 function resumeGame() {
@@ -1475,6 +1478,7 @@ function resumeGame() {
   sound.init();
   gameState = 'PLAYING';
   document.getElementById('screen-pause').classList.add('hidden');
+  updateUIState();
 }
 
 function abortGame() {
@@ -1483,6 +1487,18 @@ function abortGame() {
   document.getElementById('screen-start').classList.remove('hidden');
   document.getElementById('btn-pause').disabled = true;
   resetGame();
+  updateUIState();
+}
+
+function updateUIState() {
+  const pauseCanvasBtn = document.getElementById('btn-pause-canvas');
+  if (pauseCanvasBtn) {
+    if (gameState === 'PLAYING') {
+      pauseCanvasBtn.classList.remove('hidden');
+    } else {
+      pauseCanvasBtn.classList.add('hidden');
+    }
+  }
 }
 
 // --- INITIALIZATION ---
@@ -1497,8 +1513,8 @@ window.addEventListener('load', () => {
 
   // User input bindings
   const handleJumpTrigger = (e) => {
-    // Avoid double events or button interference
-    if (e.target.closest('button') || e.target.closest('input')) return;
+    // Avoid double events or button/overlay interference
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.game-overlay')) return;
     
     if (gameState === 'PLAYING') {
       handleFlap();
@@ -1532,9 +1548,83 @@ window.addEventListener('load', () => {
   const container = document.querySelector('.canvas-container');
   container.addEventListener('mousedown', handleJumpTrigger);
   container.addEventListener('touchstart', (e) => {
+    // Allow touch events on overlays and buttons to propagate normally to prevent blocking clicks
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.game-overlay')) {
+      return;
+    }
     e.preventDefault();
     handleJumpTrigger(e);
   }, { passive: false });
+
+  // --- MOBILE SIDENAVS & BACKDROP TOGGLES ---
+  const leftSidebar = document.querySelector('.sidebar');
+  const rightSidebar = document.querySelector('.sidebar-right');
+  const backdrop = document.getElementById('sidebar-backdrop');
+
+  const updateBackdrop = () => {
+    const anyOpen = leftSidebar.classList.contains('open') || rightSidebar.classList.contains('open');
+    if (backdrop) backdrop.classList.toggle('active', anyOpen);
+  };
+
+  const closeAllDrawers = () => {
+    if (leftSidebar) leftSidebar.classList.remove('open');
+    if (rightSidebar) rightSidebar.classList.remove('open');
+    updateBackdrop();
+  };
+
+  // Toggle Left Customization Drawer
+  const btnToggleLeft = document.getElementById('btn-toggle-left-sidebar');
+  if (btnToggleLeft) {
+    btnToggleLeft.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (leftSidebar) leftSidebar.classList.toggle('open');
+      if (rightSidebar) rightSidebar.classList.remove('open');
+      updateBackdrop();
+    });
+  }
+
+  // Toggle Right Stats Drawer
+  const btnToggleRight = document.getElementById('btn-toggle-right-sidebar');
+  if (btnToggleRight) {
+    btnToggleRight.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (rightSidebar) rightSidebar.classList.toggle('open');
+      if (leftSidebar) leftSidebar.classList.remove('open');
+      updateBackdrop();
+    });
+  }
+
+  // Close Buttons
+  const btnCloseLeft = document.getElementById('btn-close-left-sidebar');
+  if (btnCloseLeft) {
+    btnCloseLeft.addEventListener('click', closeAllDrawers);
+  }
+
+  const btnCloseRight = document.getElementById('btn-close-right-sidebar');
+  if (btnCloseRight) {
+    btnCloseRight.addEventListener('click', closeAllDrawers);
+  }
+
+  // Backdrop close trigger
+  if (backdrop) {
+    backdrop.addEventListener('click', closeAllDrawers);
+    backdrop.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      closeAllDrawers();
+    }, { passive: false });
+  }
+
+  // Mobile/Canvas Overlay Pause Button
+  const pauseCanvasBtn = document.getElementById('btn-pause-canvas');
+  if (pauseCanvasBtn) {
+    const handlePauseButton = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (gameState === 'PLAYING') pauseGame();
+    };
+    pauseCanvasBtn.addEventListener('click', handlePauseButton);
+    pauseCanvasBtn.addEventListener('touchstart', handlePauseButton, { passive: false });
+  }
 
   // Play button triggers
   document.getElementById('btn-play-start').addEventListener('click', startGameplay);
