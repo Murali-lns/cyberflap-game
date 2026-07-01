@@ -208,6 +208,11 @@ function updateStatsUI() {
   document.getElementById('stat-total-pipes').textContent = stats.totalPipes;
   document.getElementById('stat-total-jumps').textContent = stats.totalJumps;
   
+  const mBest = document.getElementById('m-val-best');
+  if (mBest) mBest.textContent = stats.highScore;
+  const mPipes = document.getElementById('m-val-pipes');
+  if (mPipes) mPipes.textContent = stats.totalPipes;
+  
   let clearRate = 0;
   if (stats.totalGames > 0) {
     clearRate = Math.round((stats.totalPipes / stats.totalGames) * 10) / 10;
@@ -451,6 +456,10 @@ function resetGame() {
   runPipesCleared = 0;
   gameFrame = 0;
   document.getElementById('score-current').textContent = 0;
+  const scoreOverlay = document.getElementById('score-current-overlay');
+  if (scoreOverlay) scoreOverlay.textContent = 0;
+  const mScore = document.getElementById('m-val-score');
+  if (mScore) mScore.textContent = 0;
   
   const container = document.querySelector('.canvas-container');
   if (container) {
@@ -621,6 +630,17 @@ function update() {
         scoreEl.classList.remove('pop-bounce');
         void scoreEl.offsetWidth; // trigger reflow
         scoreEl.classList.add('pop-bounce');
+
+        const scoreOverlay = document.getElementById('score-current-overlay');
+        if (scoreOverlay) {
+          scoreOverlay.textContent = gameScore;
+          scoreOverlay.classList.remove('pop-bounce');
+          void scoreOverlay.offsetWidth;
+          scoreOverlay.classList.add('pop-bounce');
+        }
+
+        const mScore = document.getElementById('m-val-score');
+        if (mScore) mScore.textContent = gameScore;
         
         // Spawn score flash particles
         spawnExplosion(pipe.x + pipe.w / 2, pipe.topHeight + currentPhysics.gap / 2, '#39ff14', 12);
@@ -1499,6 +1519,21 @@ function updateUIState() {
       pauseCanvasBtn.classList.add('hidden');
     }
   }
+
+  const mobileActionBtn = document.getElementById('btn-mobile-action');
+  if (mobileActionBtn) {
+    if (gameState === 'START') {
+      mobileActionBtn.classList.remove('hidden');
+      const span = mobileActionBtn.querySelector('span');
+      if (span) span.textContent = 'LAUNCH FLIGHT';
+    } else if (gameState === 'GAMEOVER') {
+      mobileActionBtn.classList.remove('hidden');
+      const span = mobileActionBtn.querySelector('span');
+      if (span) span.textContent = 'RESTART SIMULATION';
+    } else {
+      mobileActionBtn.classList.add('hidden');
+    }
+  }
 }
 
 // --- INITIALIZATION ---
@@ -1556,62 +1591,84 @@ window.addEventListener('load', () => {
     handleJumpTrigger(e);
   }, { passive: false });
 
-  // --- MOBILE SIDENAVS & BACKDROP TOGGLES ---
-  const leftSidebar = document.querySelector('.sidebar');
-  const rightSidebar = document.querySelector('.sidebar-right');
-  const backdrop = document.getElementById('sidebar-backdrop');
+  // --- MOBILE LAYOUT RESTRUCTURING ENGINE ---
+  const handleLayoutRestructuring = () => {
+    const isMobile = window.innerWidth < 768;
 
-  const updateBackdrop = () => {
-    const anyOpen = leftSidebar.classList.contains('open') || rightSidebar.classList.contains('open');
-    if (backdrop) backdrop.classList.toggle('active', anyOpen);
+    // 1. Theme Selector
+    const themeSelector = document.querySelector('.theme-selector');
+    if (themeSelector) {
+      const target = document.getElementById(isMobile ? 'mobile-theme-container' : 'desktop-theme-container');
+      if (target && themeSelector.parentNode !== target) {
+        target.appendChild(themeSelector);
+      }
+    }
+
+    // 2. Skin Selector
+    const skinSelector = document.querySelector('.skin-selector');
+    if (skinSelector) {
+      const target = document.getElementById(isMobile ? 'mobile-skin-container' : 'desktop-skin-container');
+      if (target && skinSelector.parentNode !== target) {
+        target.appendChild(skinSelector);
+      }
+    }
+
+    // 3. Physics Hack Section
+    const physicsHack = document.getElementById('physics-hack-section');
+    if (physicsHack) {
+      const target = document.getElementById(isMobile ? 'mobile-physics-container' : 'desktop-physics-container');
+      if (target && physicsHack.parentNode !== target) {
+        target.appendChild(physicsHack);
+      }
+    }
+
+    // 4. Sound Control Button
+    const soundBtn = document.getElementById('btn-sound');
+    if (soundBtn) {
+      const desktopTarget = document.querySelector('.game-controls-top');
+      const mobileTarget = document.getElementById('mobile-sound-container');
+      const target = isMobile ? mobileTarget : desktopTarget;
+      if (target && soundBtn.parentNode !== target) {
+        if (!isMobile && target.firstChild) {
+          target.insertBefore(soundBtn, target.firstChild);
+        } else {
+          target.appendChild(soundBtn);
+        }
+      }
+    }
   };
 
-  const closeAllDrawers = () => {
-    if (leftSidebar) leftSidebar.classList.remove('open');
-    if (rightSidebar) rightSidebar.classList.remove('open');
-    updateBackdrop();
-  };
+  // Run on resize and load
+  window.addEventListener('resize', handleLayoutRestructuring);
+  handleLayoutRestructuring();
 
-  // Toggle Left Customization Drawer
-  const btnToggleLeft = document.getElementById('btn-toggle-left-sidebar');
-  if (btnToggleLeft) {
-    btnToggleLeft.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (leftSidebar) leftSidebar.classList.toggle('open');
-      if (rightSidebar) rightSidebar.classList.remove('open');
-      updateBackdrop();
-    });
-  }
-
-  // Toggle Right Stats Drawer
-  const btnToggleRight = document.getElementById('btn-toggle-right-sidebar');
-  if (btnToggleRight) {
-    btnToggleRight.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (rightSidebar) rightSidebar.classList.toggle('open');
-      if (leftSidebar) leftSidebar.classList.remove('open');
-      updateBackdrop();
-    });
-  }
-
-  // Close Buttons
-  const btnCloseLeft = document.getElementById('btn-close-left-sidebar');
-  if (btnCloseLeft) {
-    btnCloseLeft.addEventListener('click', closeAllDrawers);
-  }
-
-  const btnCloseRight = document.getElementById('btn-close-right-sidebar');
-  if (btnCloseRight) {
-    btnCloseRight.addEventListener('click', closeAllDrawers);
-  }
-
-  // Backdrop close trigger
-  if (backdrop) {
-    backdrop.addEventListener('click', closeAllDrawers);
-    backdrop.addEventListener('touchstart', (e) => {
+  // Mobile Collapsible Physics toggle handler
+  const togglePhysicsBtn = document.getElementById('btn-toggle-physics-mobile');
+  const physicsContainer = document.getElementById('mobile-physics-container');
+  if (togglePhysicsBtn && physicsContainer) {
+    const togglePhysics = () => {
+      physicsContainer.classList.toggle('open');
+      togglePhysicsBtn.classList.toggle('active');
+    };
+    togglePhysicsBtn.addEventListener('click', togglePhysics);
+    togglePhysicsBtn.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      closeAllDrawers();
+      togglePhysics();
     }, { passive: false });
+  }
+
+  // Mobile unified Play / Restart action button handler
+  const mobileActionBtn = document.getElementById('btn-mobile-action');
+  if (mobileActionBtn) {
+    const handleMobileAction = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (gameState === 'START' || gameState === 'GAMEOVER') {
+        startGameplay();
+      }
+    };
+    mobileActionBtn.addEventListener('click', handleMobileAction);
+    mobileActionBtn.addEventListener('touchstart', handleMobileAction, { passive: false });
   }
 
   // Mobile/Canvas Overlay Pause Button

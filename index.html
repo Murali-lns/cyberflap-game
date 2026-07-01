@@ -48,82 +48,90 @@
       
       <div class="sidebar-section">
         <h3 class="section-title">Visual Theme</h3>
-        <div class="theme-selector">
-          <button class="theme-btn active" data-theme="cyberpunk" title="Cyberpunk Neon">
-            <span class="color-dot cp-dot"></span> Cyberpunk
-          </button>
-          <button class="theme-btn" data-theme="retro" title="8-Bit Arcade">
-            <span class="color-dot rt-dot"></span> Retro 8-Bit
-          </button>
-          <button class="theme-btn" data-theme="forest" title="Forest Zen">
-            <span class="color-dot fr-dot"></span> Forest Zen
-          </button>
+        <div id="desktop-theme-container">
+          <div class="theme-selector">
+            <button class="theme-btn active" data-theme="cyberpunk" title="Cyberpunk Neon">
+              <span class="color-dot cp-dot"></span> Cyberpunk
+            </button>
+            <button class="theme-btn" data-theme="retro" title="8-Bit Arcade">
+              <span class="color-dot rt-dot"></span> Retro 8-Bit
+            </button>
+            <button class="theme-btn" data-theme="forest" title="Forest Zen">
+              <span class="color-dot fr-dot"></span> Forest Zen
+            </button>
+          </div>
         </div>
       </div>
 
       <div class="sidebar-section">
         <h3 class="section-title">Select Bird Skin</h3>
-        <div class="skin-selector">
-          <button class="skin-btn active" data-skin="neon" id="skin-neon">
-            <canvas class="skin-preview-canvas" width="60" height="60" data-skin="neon"></canvas>
-            <span>Neon Orb</span>
-          </button>
-          <button class="skin-btn" data-skin="retro" id="skin-retro">
-            <canvas class="skin-preview-canvas" width="60" height="60" data-skin="retro"></canvas>
-            <span>Retro Bird</span>
-          </button>
-          <button class="skin-btn" data-skin="rocket" id="skin-rocket">
-            <canvas class="skin-preview-canvas" width="60" height="60" data-skin="rocket"></canvas>
-            <span>Rocket</span>
-          </button>
-          <button class="skin-btn" data-skin="bat" id="skin-bat">
-            <canvas class="skin-preview-canvas" width="60" height="60" data-skin="bat"></canvas>
-            <span>Vamp Bat</span>
-          </button>
+        <div id="desktop-skin-container">
+          <div class="skin-selector">
+            <button class="skin-btn active" data-skin="neon" id="skin-neon">
+              <canvas class="skin-preview-canvas" width="60" height="60" data-skin="neon"></canvas>
+              <span>Neon Orb</span>
+            </button>
+            <button class="skin-btn" data-skin="retro" id="skin-retro">
+              <canvas class="skin-preview-canvas" width="60" height="60" data-skin="retro"></canvas>
+              <span>Retro Bird</span>
+            </button>
+            <button class="skin-btn" data-skin="rocket" id="skin-rocket">
+              <canvas class="skin-preview-canvas" width="60" height="60" data-skin="rocket"></canvas>
+              <span>Rocket</span>
+            </button>
+            <button class="skin-btn" data-skin="bat" id="skin-bat">
+              <canvas class="skin-preview-canvas" width="60" height="60" data-skin="bat"></canvas>
+              <span>Vamp Bat</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <div class="sidebar-section">
-        <div class="section-header-row">
-          <h3 class="section-title">Physics Hack</h3>
-          <button class="reset-btn" id="btn-reset-physics" title="Reset to standard physics">Reset</button>
-        </div>
-        <div class="difficulty-presets">
-          <button class="preset-btn" data-preset="easy">Easy</button>
-          <button class="preset-btn active" data-preset="normal">Medium</button>
-          <button class="preset-btn" data-preset="hard">Hard</button>
-        </div>
-        
-        <div class="control-group">
-          <div class="control-label">
-            <span>Gravity</span>
-            <span class="val-display" id="val-gravity">0.4</span>
-          </div>
-          <input type="range" id="slider-gravity" min="0.1" max="1.0" step="0.05" value="0.4">
-        </div>
+        <div id="desktop-physics-container">
+          <div id="physics-hack-section">
+            <div class="section-header-row">
+              <h3 class="section-title">Physics Hack</h3>
+              <button class="reset-btn" id="btn-reset-physics" title="Reset to standard physics">Reset</button>
+            </div>
+            <div class="difficulty-presets">
+              <button class="preset-btn" data-preset="easy">Easy</button>
+              <button class="preset-btn active" data-preset="normal">Medium</button>
+              <button class="preset-btn" data-preset="hard">Hard</button>
+            </div>
+            
+            <div class="control-group">
+              <div class="control-label">
+                <span>Gravity</span>
+                <span class="val-display" id="val-gravity">0.4</span>
+              </div>
+              <input type="range" id="slider-gravity" min="0.1" max="1.0" step="0.05" value="0.4">
+            </div>
 
-        <div class="control-group">
-          <div class="control-label">
-            <span>Jump Strength</span>
-            <span class="val-display" id="val-jump">-7.0</span>
-          </div>
-          <input type="range" id="slider-jump" min="-12.0" max="-4.0" step="0.5" value="-7.0">
-        </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Jump Strength</span>
+                <span class="val-display" id="val-jump">-7.0</span>
+              </div>
+              <input type="range" id="slider-jump" min="-12.0" max="-4.0" step="0.5" value="-7.0">
+            </div>
 
-        <div class="control-group">
-          <div class="control-label">
-            <span>Pipe Speed</span>
-            <span class="val-display" id="val-speed">2.5</span>
-          </div>
-          <input type="range" id="slider-speed" min="1.0" max="6.0" step="0.2" value="2.5">
-        </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Pipe Speed</span>
+                <span class="val-display" id="val-speed">2.5</span>
+              </div>
+              <input type="range" id="slider-speed" min="1.0" max="6.0" step="0.2" value="2.5">
+            </div>
 
-        <div class="control-group">
-          <div class="control-label">
-            <span>Pipe Gap</span>
-            <span class="val-display" id="val-gap">140px</span>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Pipe Gap</span>
+                <span class="val-display" id="val-gap">140px</span>
+              </div>
+              <input type="range" id="slider-gap" min="100" max="220" step="5" value="140">
+            </div>
           </div>
-          <input type="range" id="slider-gap" min="100" max="220" step="5" value="140">
         </div>
       </div>
     </aside>
@@ -159,6 +167,10 @@
 
       <!-- The canvas container that manages viewport scales & layers -->
       <div class="canvas-container card">
+        <!-- Canvas Score Overlay (Mobile only) -->
+        <div id="canvas-score-overlay" class="canvas-score-overlay">
+          <div class="score-val" id="score-current-overlay">0</div>
+        </div>
         <canvas id="game-canvas" width="600" height="520"></canvas>
         
         <!-- Mobile/Canvas Pause Button -->
@@ -252,22 +264,24 @@
       <!-- Quick stats block -->
       <div class="sidebar-section">
         <h3 class="section-title">Telemetry Stats</h3>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-val" id="stat-total-games">0</span>
-            <span class="stat-lbl">Runs Launch</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-val" id="stat-total-pipes">0</span>
-            <span class="stat-lbl">Pipes Cleared</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-val" id="stat-total-jumps">0</span>
-            <span class="stat-lbl">Energy Flaps</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-val" id="stat-accuracy">0%</span>
-            <span class="stat-lbl">Clear Rate</span>
+        <div id="desktop-stats-container">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-val" id="stat-total-games">0</span>
+              <span class="stat-lbl">Runs Launch</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-val" id="stat-total-pipes">0</span>
+              <span class="stat-lbl">Pipes Cleared</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-val" id="stat-total-jumps">0</span>
+              <span class="stat-lbl">Energy Flaps</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-val" id="stat-accuracy">0%</span>
+              <span class="stat-lbl">Clear Rate</span>
+            </div>
           </div>
         </div>
       </div>
@@ -333,6 +347,64 @@
       </div>
     </aside>
     
+  </div>
+
+  <!-- BOTTOM PANEL: MOBILE-ONLY CONTROLS & SELECTIONS -->
+  <div id="mobile-bottom-panel" class="mobile-bottom-panel">
+    <!-- 1. Controls Row: Play/Restart button + Sound toggle -->
+    <div class="mobile-controls-row">
+      <button id="btn-mobile-action" class="action-btn glow-btn mobile-action-btn">
+        <span>LAUNCH FLIGHT</span>
+      </button>
+      <div id="mobile-sound-container">
+        <!-- JS will move btn-sound here -->
+      </div>
+    </div>
+
+    <!-- 2. Quick stats: score, best, pipes -->
+    <div class="mobile-stats-row">
+      <div class="m-stat-card">
+        <span class="m-stat-lbl">SCORE</span>
+        <span class="m-stat-val" id="m-val-score">0</span>
+      </div>
+      <div class="m-stat-card">
+        <span class="m-stat-lbl">BEST RUN</span>
+        <span class="m-stat-val" id="m-val-best">0</span>
+      </div>
+      <div class="m-stat-card">
+        <span class="m-stat-lbl">PIPES PASSED</span>
+        <span class="m-stat-val" id="m-val-pipes">0</span>
+      </div>
+    </div>
+
+    <!-- 3. Theme Selector -->
+    <div class="mobile-section">
+      <h4 class="mobile-section-title">Visual Theme</h4>
+      <div id="mobile-theme-container">
+        <!-- JS will move theme-selector here -->
+      </div>
+    </div>
+
+    <!-- 4. Skin Selector -->
+    <div class="mobile-section">
+      <h4 class="mobile-section-title">Select Bird Skin</h4>
+      <div id="mobile-skin-container">
+        <!-- JS will move skin-selector here -->
+      </div>
+    </div>
+
+    <!-- 5. Physics Hack with a Collapsible Toggle Button -->
+    <div class="mobile-section">
+      <button id="btn-toggle-physics-mobile" class="physics-toggle-btn">
+        <span>Physics Hack Settings</span>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="toggle-arrow">
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </button>
+      <div id="mobile-physics-container" class="physics-collapsible collapsed">
+        <!-- JS will move physics-hack-section here -->
+      </div>
+    </div>
   </div>
 
   <!-- Javascript Logic -->
