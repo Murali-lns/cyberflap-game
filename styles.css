@@ -239,6 +239,12 @@ body {
   gap: 8px;
 }
 
+.skin-preview-canvas {
+  width: 60px;
+  height: 60px;
+  display: block;
+}
+
 .skin-btn {
   background: var(--input-bg);
   border: 1px solid var(--card-border);
@@ -252,51 +258,37 @@ body {
   gap: 8px;
   font-family: var(--font-sans);
   font-size: 0.75rem;
-  transition: all var(--transition-fast);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .skin-btn:hover {
-  border-color: var(--accent-secondary);
-  transform: translateY(-2px);
+  transform: scale(1.05);
+}
+
+#skin-neon:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+}
+
+#skin-retro:hover {
+  border-color: #f1c40f;
+  box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+}
+
+#skin-rocket:hover {
+  border-color: #e67e22;
+  box-shadow: 0 0 15px rgba(230, 126, 34, 0.6);
+}
+
+#skin-bat:hover {
+  border-color: #ff3333;
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
 }
 
 .skin-btn.active {
   border-color: var(--accent-primary);
   background: var(--card-bg);
   box-shadow: var(--shadow-glow);
-}
-
-.skin-preview {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  position: relative;
-}
-
-.neon-prev {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  box-shadow: 0 0 10px var(--accent-secondary);
-}
-
-.retro-prev::before {
-  content: '';
-  position: absolute;
-  top: 4px; left: 4px; right: 4px; bottom: 4px;
-  background-color: #f1c40f;
-  box-shadow: inset -2px -2px 0 #d35400, inset 2px 2px 0 #f39c12;
-}
-
-.rocket-prev {
-  border-radius: var(--radius-sm);
-  background: #e74c3c;
-  clip-path: polygon(50% 0%, 100% 80%, 50% 100%, 0% 80%);
-  filter: drop-shadow(0 0 4px #e74c3c);
-}
-
-.bat-prev {
-  background: #34495e;
-  border-radius: var(--radius-sm);
-  clip-path: polygon(10% 25%, 35% 0%, 50% 20%, 65% 0%, 90% 25%, 100% 60%, 75% 60%, 50% 100%, 25% 60%, 0% 60%);
 }
 
 /* Physics hack control sliders */
@@ -895,6 +887,34 @@ input[type="range"]::-webkit-slider-thumb:hover {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes popBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.4); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.pop-bounce {
+  animation: popBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  display: inline-block;
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-6px, -4px); }
+  20% { transform: translate(4px, 6px); }
+  30% { transform: translate(-8px, 2px); }
+  40% { transform: translate(6px, -6px); }
+  50% { transform: translate(-4px, 4px); }
+  65% { transform: translate(4px, -2px); }
+  80% { transform: translate(-2px, 2px); }
+  90% { transform: translate(1px, -1px); }
+}
+
+.shake {
+  animation: screenShake 0.45s ease-in-out;
 }
 
 /* Glow classes */

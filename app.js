@@ -125,6 +125,32 @@ const retroBirdGrid = [
   [0,0,0,0,1,1,1,1,1,0,0,0]
 ];
 
+const retroBirdGridUp = [
+  [0,0,0,0,1,1,1,1,1,1,0,0],
+  [0,0,0,1,2,2,2,2,2,2,1,0],
+  [0,0,1,2,5,5,2,2,3,3,1,1],
+  [0,1,2,5,5,5,2,3,1,3,1,1],
+  [1,2,2,2,5,5,2,2,2,3,1,0],
+  [1,2,2,2,2,2,2,2,4,4,4,1],
+  [1,2,2,2,2,2,2,4,4,4,4,1],
+  [0,1,2,2,2,2,2,2,4,4,1,0],
+  [0,0,1,1,2,2,2,2,2,1,0,0],
+  [0,0,0,0,1,1,1,1,1,0,0,0]
+];
+
+const retroBirdGridDown = [
+  [0,0,0,0,1,1,1,1,1,1,0,0],
+  [0,0,0,1,2,2,2,2,2,2,1,0],
+  [0,0,1,2,2,2,2,2,3,3,1,1],
+  [0,1,2,2,2,2,2,3,1,3,1,1],
+  [1,2,2,2,2,2,2,2,2,3,1,0],
+  [1,2,2,5,5,5,2,2,4,4,4,1],
+  [1,2,2,5,5,2,2,4,4,4,4,1],
+  [0,1,2,2,2,2,2,2,4,4,1,0],
+  [0,0,1,1,2,2,2,2,2,1,0,0],
+  [0,0,0,0,1,1,1,1,1,0,0,0]
+];
+
 // --- DYNAMIC THEME COLORS FOR CANVAS ---
 let themeColors = {
   accentPrimary: '#ff007f',
@@ -355,7 +381,7 @@ function initParallaxBackground() {
         x: Math.random() * width,
         y: Math.random() * (height - 120),
         size: Math.random() * 2 + 1,
-        speed: Math.random() * 0.1 + 0.05
+        speed: Math.random() * 0.15 + 0.08
       });
     }
     // Cyberpunk City Skyline (Layer 2)
@@ -365,7 +391,7 @@ function initParallaxBackground() {
         x: i * 90,
         w: 60 + Math.random() * 40,
         h: 150 + Math.random() * 150,
-        speed: 0.4,
+        speed: 0.7,
         color: `hsl(${260 + Math.random() * 20}, 40%, ${10 + Math.random() * 6}%)`
       });
     }
@@ -378,7 +404,7 @@ function initParallaxBackground() {
         y: 40 + Math.random() * 60,
         w: 50 + Math.random() * 30,
         h: 20 + Math.random() * 10,
-        speed: 0.15
+        speed: 0.25
       });
     }
     // Retro Hills (Layer 2)
@@ -388,7 +414,7 @@ function initParallaxBackground() {
         x: i * 150,
         w: 160,
         h: 60 + Math.random() * 40,
-        speed: 0.5
+        speed: 0.85
       });
     }
   } else if (currentTheme === 'forest') {
@@ -399,7 +425,7 @@ function initParallaxBackground() {
         x: i * 200,
         w: 240,
         h: 120 + Math.random() * 80,
-        speed: 0.2
+        speed: 0.35
       });
     }
     // Forest Pine Trees (Layer 2)
@@ -408,7 +434,7 @@ function initParallaxBackground() {
         type: 'tree',
         x: i * 50 + Math.random() * 15,
         h: 80 + Math.random() * 70,
-        speed: 0.6
+        speed: 1.0
       });
     }
   }
@@ -426,6 +452,11 @@ function resetGame() {
   gameFrame = 0;
   document.getElementById('score-current').textContent = 0;
   
+  const container = document.querySelector('.canvas-container');
+  if (container) {
+    container.classList.remove('shake');
+  }
+
   // Clear any temporary toast items in game over overlay
   const toastContainer = document.getElementById('gameover-achievement-unlock');
   if (toastContainer) {
@@ -486,6 +517,7 @@ function spawnTrail(x, y, color) {
   });
 }
 
+// Trail particles from flapping
 function handleFlap() {
   if (gameState !== 'PLAYING') return;
   bird.velocity = currentPhysics.jump;
@@ -525,6 +557,22 @@ function update() {
       if (currentSkin === 'retro') tColor = 'rgba(241, 196, 15, 0.5)';
       if (currentSkin === 'bat') tColor = 'rgba(127, 140, 141, 0.5)';
       spawnTrail(bird.x, bird.y, tColor);
+    }
+
+    // Spawn Rocket exhaust particles
+    if (currentSkin === 'rocket') {
+      if (gameFrame % 2 === 0) {
+        particles.push({
+          x: bird.x - 22,
+          y: bird.y + (Math.random() * 6 - 3),
+          vx: -currentPhysics.speed - (Math.random() * 2),
+          vy: Math.random() * 2 - 1,
+          size: Math.random() * 4 + 2,
+          color: Math.random() > 0.4 ? '#e67e22' : '#f1c40f',
+          alpha: 0.8,
+          decay: 0.04
+        });
+      }
     }
 
     // Floor / Ceiling collisions
@@ -568,7 +616,11 @@ function update() {
         stats.totalPipes++;
         saveStats();
         sound.playScore();
-        document.getElementById('score-current').textContent = gameScore;
+        const scoreEl = document.getElementById('score-current');
+        scoreEl.textContent = gameScore;
+        scoreEl.classList.remove('pop-bounce');
+        void scoreEl.offsetWidth; // trigger reflow
+        scoreEl.classList.add('pop-bounce');
         
         // Spawn score flash particles
         spawnExplosion(pipe.x + pipe.w / 2, pipe.topHeight + currentPhysics.gap / 2, '#39ff14', 12);
@@ -611,6 +663,14 @@ function triggerGameOver() {
   gameState = 'GAMEOVER';
   sound.playHit();
   
+  // Trigger screen shake
+  const container = document.querySelector('.canvas-container');
+  if (container) {
+    container.classList.remove('shake');
+    void container.offsetWidth; // trigger reflow
+    container.classList.add('shake');
+  }
+
   // High score update
   if (gameScore > stats.highScore) {
     stats.highScore = gameScore;
@@ -755,15 +815,18 @@ function drawPipe(pipe) {
 
   ctx.save();
   if (currentTheme === 'cyberpunk') {
-    // Pipe gradients (neon magenta & cyber blue)
+    // Pulsing gradient color stops
+    const pulseOffsetTop = Math.sin(gameFrame * 0.06 + pipe.x * 0.015) * 0.15 + 0.4;
+    const pulseOffsetBot = Math.sin(gameFrame * 0.06 + pipe.x * 0.015 + Math.PI) * 0.15 + 0.4;
+
     let gradTop = ctx.createLinearGradient(pipe.x, 0, pipe.x + width, 0);
     gradTop.addColorStop(0, '#ff007f');
-    gradTop.addColorStop(0.4, '#8000ff');
+    gradTop.addColorStop(Math.max(0.1, Math.min(0.9, pulseOffsetTop)), '#8000ff');
     gradTop.addColorStop(1, '#ff007f');
 
     let gradBot = ctx.createLinearGradient(pipe.x, botY, pipe.x + width, botY);
     gradBot.addColorStop(0, '#00f0ff');
-    gradBot.addColorStop(0.4, '#0055ff');
+    gradBot.addColorStop(Math.max(0.1, Math.min(0.9, pulseOffsetBot)), '#0055ff');
     gradBot.addColorStop(1, '#00f0ff');
 
     // Draw main tubes
@@ -772,6 +835,15 @@ function drawPipe(pipe) {
     
     ctx.fillStyle = gradBot;
     ctx.fillRect(pipe.x + 4, botY + 24, width - 8, botH - 24);
+
+    // Draw scrolling scanner/flow lines on cyberpunk tubes
+    const scannerYTop = (gameFrame * 1.5 + pipe.x * 0.5) % (topH - 24);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(pipe.x + 4, scannerYTop, width - 8, 3);
+
+    const scannerYBot = botY + 24 + ((gameFrame * 1.5 + pipe.x * 0.5) % (botH - 24));
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(pipe.x + 4, scannerYBot, width - 8, 3);
 
     // Draw tube caps
     ctx.strokeStyle = '#ff007f';
@@ -795,8 +867,10 @@ function drawPipe(pipe) {
   } 
   else if (currentTheme === 'retro') {
     ctx.fillStyle = '#000';
+    // Pulse outline width slightly
+    const strokeWidthPulse = 3.0 + Math.sin(gameFrame * 0.08 + pipe.x * 0.02) * 0.8;
     ctx.strokeStyle = '#39ff14';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = strokeWidthPulse;
 
     // Top blocky pipe
     ctx.fillRect(pipe.x, 0, width, topH);
@@ -812,10 +886,16 @@ function drawPipe(pipe) {
     ctx.fillRect(pipe.x - 4, botY, width + 8, 24);
     ctx.strokeRect(pipe.x - 4, botY, width + 8, 24);
 
-    // Pixel stripes for shading
+    // Pixel stripes for shading with smooth retro scroll
+    const retroScrollTop = Math.floor(gameFrame * 0.6) % 30;
     ctx.fillStyle = '#39ff14';
-    ctx.fillRect(pipe.x + 10, 0, 6, topH - 24);
-    ctx.fillRect(pipe.x + 10, botY + 24, 6, botH - 24);
+    for (let sy = retroScrollTop; sy < topH - 24; sy += 30) {
+      ctx.fillRect(pipe.x + 12, sy, 5, 10);
+    }
+    const retroScrollBot = Math.floor(gameFrame * 0.6) % 30;
+    for (let sy = botY + 24 + retroScrollBot; sy < canvas.height - 40; sy += 30) {
+      ctx.fillRect(pipe.x + 12, sy, 5, 10);
+    }
   } 
   else if (currentTheme === 'forest') {
     // Tree trunks
@@ -828,10 +908,19 @@ function drawPipe(pipe) {
     ctx.fillRect(pipe.x + 8, 0, width - 16, topH - 12);
     ctx.fillRect(pipe.x + 8, botY + 12, width - 16, botH - 12);
 
-    // Moss / Foliage caps
+    // Flowing shading highlight scroll on tree trunk
+    const forestScrollYTop = (gameFrame * 0.5 + pipe.x * 0.2) % (topH - 12);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fillRect(pipe.x + 8, forestScrollYTop, width - 16, 8);
+
+    const forestScrollYBot = botY + 12 + ((gameFrame * 0.5 + pipe.x * 0.2) % (botH - 12));
+    ctx.fillRect(pipe.x + 8, forestScrollYBot, width - 16, 8);
+
+    // Moss / Foliage caps with radial gradient radius pulsing
+    const foliagePulse = Math.sin(gameFrame * 0.05 + pipe.x * 0.015) * 4 + width/2;
     let leafGrad = ctx.createRadialGradient(
       pipe.x + width/2, topH - 6, 4,
-      pipe.x + width/2, topH - 6, width/2
+      pipe.x + width/2, topH - 6, Math.max(10, foliagePulse)
     );
     leafGrad.addColorStop(0, '#2ecc71');
     leafGrad.addColorStop(1, '#27ae60');
@@ -841,9 +930,10 @@ function drawPipe(pipe) {
     ctx.arc(pipe.x + width/2, topH - 6, width/2, 0, Math.PI * 2);
     ctx.fill();
 
+    const foliagePulseBot = Math.sin(gameFrame * 0.05 + pipe.x * 0.015 + Math.PI) * 4 + width/2;
     let leafGradBot = ctx.createRadialGradient(
       pipe.x + width/2, botY + 6, 4,
-      pipe.x + width/2, botY + 6, width/2
+      pipe.x + width/2, botY + 6, Math.max(10, foliagePulseBot)
     );
     leafGradBot.addColorStop(0, '#2ecc71');
     leafGradBot.addColorStop(1, '#1e824c');
@@ -920,10 +1010,22 @@ function drawFloor() {
 
 function drawBird() {
   ctx.save();
-  ctx.translate(bird.x, bird.y);
-  ctx.rotate(bird.angle);
+  
+  // Subtle floating animation on the start screen
+  let drawY = bird.y;
+  let drawAngle = bird.angle;
+  if (gameState === 'START') {
+    drawY += Math.sin(gameFrame * 0.08) * 12;
+    drawAngle = Math.sin(gameFrame * 0.05) * 0.08;
+  }
+  
+  ctx.translate(bird.x, drawY);
+  ctx.rotate(drawAngle);
 
   if (currentSkin === 'neon') {
+    // Pulsing shadow blur
+    const pulseBlur = 15 + Math.sin(gameFrame * 0.1) * 8;
+    
     // Inner light core
     let glowGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, bird.radius);
     glowGrad.addColorStop(0, '#fff');
@@ -931,18 +1033,25 @@ function drawBird() {
     glowGrad.addColorStop(1, themeColors.accentPrimary);
 
     ctx.fillStyle = glowGrad;
-    ctx.shadowBlur = 15;
+    ctx.shadowBlur = pulseBlur;
     ctx.shadowColor = themeColors.accentPrimary;
     ctx.beginPath();
     ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Outer orbital ring
+    // Orbiting rings that rotate
     ctx.shadowBlur = 0;
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 1.5;
+    
+    // Ring 1 (forward rotation)
     ctx.beginPath();
-    ctx.ellipse(0, 0, bird.radius + 3, bird.radius * 0.4, Math.PI/4 + bird.flapFrame * 0.15, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, bird.radius + 3, bird.radius * 0.4, Math.PI/4 + gameFrame * 0.05, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Ring 2 (reverse rotation)
+    ctx.beginPath();
+    ctx.ellipse(0, 0, bird.radius + 3, bird.radius * 0.4, -Math.PI/4 - gameFrame * 0.07, 0, Math.PI * 2);
     ctx.stroke();
   } 
   else if (currentSkin === 'retro') {
@@ -951,9 +1060,15 @@ function drawBird() {
     const startX = -6 * pixelSize;
     const startY = -5 * pixelSize;
 
-    for (let r = 0; r < retroBirdGrid.length; r++) {
-      for (let c = 0; c < retroBirdGrid[r].length; c++) {
-        const val = retroBirdGrid[r][c];
+    // Pixel wing flap animation (up/down cycle)
+    const cycle = Math.floor(gameFrame / 4) % 4;
+    let grid = retroBirdGrid;
+    if (cycle === 1) grid = retroBirdGridUp;
+    else if (cycle === 3) grid = retroBirdGridDown;
+
+    for (let r = 0; r < grid.length; r++) {
+      for (let c = 0; c < grid[r].length; c++) {
+        const val = grid[r][c];
         if (val === 0) continue;
 
         if (val === 1) ctx.fillStyle = '#000000';
@@ -994,16 +1109,27 @@ function drawBird() {
     ctx.fillStyle = '#e74c3c';
     ctx.fillRect(-22, -6, 4, 12);
 
-    // Thrust Fire particles
-    if (gameState === 'PLAYING' && bird.velocity < 0) {
-      ctx.fillStyle = '#f39c12';
-      ctx.beginPath();
-      ctx.moveTo(-22, -4);
-      ctx.lineTo(-34 - (Math.random() * 8), 0);
-      ctx.lineTo(-22, 4);
-      ctx.closePath();
-      ctx.fill();
-    }
+    // Flickering thrust flame
+    const isJumping = (gameState === 'PLAYING' && bird.velocity < 0);
+    const flameLength = isJumping ? (18 + Math.random() * 12) : (8 + Math.random() * 6);
+    
+    // Outer red flame
+    ctx.fillStyle = '#ff3300';
+    ctx.beginPath();
+    ctx.moveTo(-22, -6);
+    ctx.lineTo(-22 - flameLength, 0);
+    ctx.lineTo(-22, 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // Inner yellow flame
+    ctx.fillStyle = '#ffcc00';
+    ctx.beginPath();
+    ctx.moveTo(-22, -3);
+    ctx.lineTo(-22 - flameLength * 0.6, 0);
+    ctx.lineTo(-22, 3);
+    ctx.closePath();
+    ctx.fill();
 
     // Cockpit glass
     ctx.fillStyle = '#3498db';
@@ -1015,7 +1141,7 @@ function drawBird() {
     ctx.fillStyle = '#2c3e50';
     
     // Wings flapping based on sinus
-    const wingFlapAngle = bird.flapFrame * 0.6;
+    const wingFlapAngle = bird.flapFrame * 0.7;
 
     // Left Wing
     ctx.save();
@@ -1053,19 +1179,276 @@ function drawBird() {
     ctx.lineTo(8, -6);
     ctx.fill();
 
-    // Glowing red eyes
-    ctx.fillStyle = '#ff3333';
+    // Glowing red eyes that pulse
+    const eyePulse = 0.5 + Math.sin(gameFrame * 0.15) * 0.5;
+    ctx.save();
+    ctx.fillStyle = `rgba(255, 51, 51, ${0.4 + eyePulse * 0.6})`;
+    ctx.shadowBlur = 4 * eyePulse + 2;
+    ctx.shadowColor = '#ff3333';
     ctx.fillRect(-4, -4, 2, 2);
     ctx.fillRect(2, -4, 2, 2);
+    ctx.restore();
   }
 
   ctx.restore();
+}
+
+// Preview particles for the Rocket skin preview button
+let previewParticles = [];
+
+function drawSkinPreview(canvasEl, pCtx, skin, time, isHovered) {
+  pCtx.save();
+  pCtx.translate(30, 30);
+
+  if (skin === 'neon') {
+    // Glow pulse on hover
+    const pulse = isHovered ? Math.sin(time * 0.15) * 5 + 15 : 12;
+    
+    // Inner light core
+    let glowGrad = pCtx.createRadialGradient(0, 0, 2, 0, 0, 14);
+    glowGrad.addColorStop(0, '#fff');
+    glowGrad.addColorStop(0.3, themeColors.accentSecondary);
+    glowGrad.addColorStop(1, themeColors.accentPrimary);
+
+    pCtx.fillStyle = glowGrad;
+    pCtx.shadowBlur = pulse;
+    pCtx.shadowColor = themeColors.accentPrimary;
+    pCtx.beginPath();
+    pCtx.arc(0, 0, 14, 0, Math.PI * 2);
+    pCtx.fill();
+
+    // Outer orbital rings
+    pCtx.shadowBlur = 0;
+    pCtx.strokeStyle = '#fff';
+    pCtx.lineWidth = 1.2;
+    
+    const spinSpeed = isHovered ? time * 0.12 : time * 0.03;
+    
+    // Ring 1
+    pCtx.beginPath();
+    pCtx.ellipse(0, 0, 17, 7, Math.PI/4 + spinSpeed, 0, Math.PI * 2);
+    pCtx.stroke();
+    
+    // Ring 2
+    pCtx.beginPath();
+    pCtx.ellipse(0, 0, 17, 7, -Math.PI/4 - spinSpeed * 0.7, 0, Math.PI * 2);
+    pCtx.stroke();
+  } 
+  else if (skin === 'retro') {
+    // Retro pixelates: block size fluctuates on hover
+    let pixelSize = 2.4;
+    if (isHovered) {
+      // Oscillates the pixel size to create a cool pixelating/resolution changing effect
+      pixelSize = 2.4 + Math.sin(time * 0.12) * 0.6;
+    }
+    
+    const startX = -6 * pixelSize;
+    const startY = -5 * pixelSize;
+    
+    // Selection grid based on wing flap speed
+    const flapSpeed = isHovered ? 0.25 : 0.05;
+    const flapFrame = Math.sin(time * flapSpeed);
+    
+    let grid = retroBirdGrid;
+    if (isHovered) {
+      const cycle = Math.floor(time * 0.2) % 4;
+      if (cycle === 1) grid = retroBirdGridUp;
+      else if (cycle === 3) grid = retroBirdGridDown;
+    }
+
+    for (let r = 0; r < grid.length; r++) {
+      for (let c = 0; c < grid[r].length; c++) {
+        const val = grid[r][c];
+        if (val === 0) continue;
+
+        if (val === 1) pCtx.fillStyle = '#000000';
+        else if (val === 2) pCtx.fillStyle = '#f1c40f'; // yellow
+        else if (val === 3) pCtx.fillStyle = '#ffffff'; // eye white
+        else if (val === 4) pCtx.fillStyle = '#e67e22'; // beak
+        else if (val === 5) {
+          pCtx.fillStyle = flapFrame > 0 ? '#f1c40f' : '#ffffff';
+        }
+
+        pCtx.fillRect(startX + c * pixelSize, startY + r * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  } 
+  else if (skin === 'rocket') {
+    // Metallic spaceship fuselage
+    let metalGrad = pCtx.createLinearGradient(-12, -8, 12, 8);
+    metalGrad.addColorStop(0, '#bdc3c7');
+    metalGrad.addColorStop(0.5, '#ecf0f1');
+    metalGrad.addColorStop(1, '#95a5a6');
+
+    pCtx.fillStyle = metalGrad;
+    pCtx.strokeStyle = '#7f8c8d';
+    pCtx.lineWidth = 1.2;
+    
+    // Draw nose cone shape
+    pCtx.beginPath();
+    pCtx.moveTo(15, 0);
+    pCtx.bezierCurveTo(7, -10, -7, -10, -15, -8);
+    pCtx.lineTo(-15, 8);
+    pCtx.bezierCurveTo(-7, 10, 7, 10, 15, 0);
+    pCtx.closePath();
+    pCtx.fill();
+    pCtx.stroke();
+
+    // Thruster ring
+    pCtx.fillStyle = '#e74c3c';
+    pCtx.fillRect(-18, -5, 3, 10);
+
+    // Flickering thrust flame on hover
+    if (isHovered) {
+      const flameLength = 12 + Math.random() * 8;
+      
+      // Outer red flame
+      pCtx.fillStyle = '#ff3300';
+      pCtx.beginPath();
+      pCtx.moveTo(-18, -5);
+      pCtx.lineTo(-18 - flameLength, 0);
+      pCtx.lineTo(-18, 5);
+      pCtx.closePath();
+      pCtx.fill();
+
+      // Inner yellow flame
+      pCtx.fillStyle = '#ffcc00';
+      pCtx.beginPath();
+      pCtx.moveTo(-18, -3);
+      pCtx.lineTo(-18 - flameLength * 0.6, 0);
+      pCtx.lineTo(-18, 3);
+      pCtx.closePath();
+      pCtx.fill();
+      
+      // Spawn exhaust particles inside preview box
+      if (Math.random() < 0.5) {
+        previewParticles.push({
+          skin: 'rocket',
+          x: 30 - 18,
+          y: 30 + (Math.random() * 6 - 3),
+          vx: -1.2 - Math.random() * 1.5,
+          vy: Math.random() * 1.0 - 0.5,
+          size: Math.random() * 2 + 1,
+          color: Math.random() > 0.4 ? '#e67e22' : '#f1c40f',
+          alpha: 1.0,
+          decay: 0.06
+        });
+      }
+    }
+
+    // Cockpit glass
+    pCtx.fillStyle = '#3498db';
+    pCtx.beginPath();
+    pCtx.arc(5, -1, 3, 0, Math.PI * 2);
+    pCtx.fill();
+  } 
+  else if (skin === 'bat') {
+    pCtx.fillStyle = '#2c3e50';
+    
+    // Wings flapping speed based on hover
+    const flapSpeed = isHovered ? 0.35 : 0.05;
+    const flapFrame = Math.sin(time * flapSpeed);
+    const wingFlapAngle = isHovered ? flapFrame * 0.8 : 0.1;
+
+    // Left Wing
+    pCtx.save();
+    pCtx.rotate(-wingFlapAngle);
+    pCtx.beginPath();
+    pCtx.moveTo(0, 0);
+    pCtx.bezierCurveTo(-12, -15, -20, -5, -22, 3);
+    pCtx.bezierCurveTo(-16, 3, -8, 10, 0, 0);
+    pCtx.fill();
+    pCtx.restore();
+
+    // Right Wing
+    pCtx.save();
+    pCtx.rotate(wingFlapAngle);
+    pCtx.beginPath();
+    pCtx.moveTo(0, 0);
+    pCtx.bezierCurveTo(12, -15, 20, -5, 22, 3);
+    pCtx.bezierCurveTo(16, 3, 8, 10, 0, 0);
+    pCtx.fill();
+    pCtx.restore();
+
+    // Bat Head/Body core
+    pCtx.fillStyle = '#1a252f';
+    pCtx.beginPath();
+    pCtx.arc(0, 0, 8, 0, Math.PI * 2);
+    pCtx.fill();
+
+    // Pointy Ears
+    pCtx.beginPath();
+    pCtx.moveTo(-6, -5);
+    pCtx.lineTo(-8, -12);
+    pCtx.lineTo(-2, -7);
+    pCtx.moveTo(2, -7);
+    pCtx.lineTo(8, -12);
+    pCtx.lineTo(6, -5);
+    pCtx.fill();
+
+    // Glowing red eyes that pulse on hover
+    const eyePulse = isHovered ? 0.5 + Math.sin(time * 0.2) * 0.5 : 0.8;
+    pCtx.save();
+    pCtx.fillStyle = `rgba(255, 51, 51, ${0.4 + eyePulse * 0.6})`;
+    pCtx.shadowBlur = 4 * eyePulse + 2;
+    pCtx.shadowColor = '#ff3333';
+    pCtx.fillRect(-3, -3, 1.5, 1.5);
+    pCtx.fillRect(1.5, -3, 1.5, 1.5);
+    pCtx.restore();
+  }
+
+  pCtx.restore();
+}
+
+function updateAndDrawPreviews() {
+  // Update preview particles
+  for (let i = previewParticles.length - 1; i >= 0; i--) {
+    const p = previewParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha -= p.decay;
+    if (p.alpha <= 0) {
+      previewParticles.splice(i, 1);
+    }
+  }
+
+  const skins = ['neon', 'retro', 'rocket', 'bat'];
+  skins.forEach(skin => {
+    const btn = document.getElementById(`skin-${skin}`);
+    const canvasEl = btn ? btn.querySelector('.skin-preview-canvas') : null;
+    if (!canvasEl) return;
+
+    const isHovered = btn.matches(':hover');
+    const time = gameFrame;
+
+    const pCtx = canvasEl.getContext('2d');
+    pCtx.clearRect(0, 0, 60, 60);
+
+    // Draw skin preview
+    drawSkinPreview(canvasEl, pCtx, skin, time, isHovered);
+
+    // Draw particles specifically inside the rocket preview canvas
+    if (skin === 'rocket') {
+      previewParticles.forEach(p => {
+        if (p.skin === 'rocket') {
+          pCtx.save();
+          pCtx.globalAlpha = p.alpha;
+          pCtx.fillStyle = p.color;
+          pCtx.beginPath();
+          pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          pCtx.fill();
+          pCtx.restore();
+        }
+      });
+    }
+  });
 }
 
 // Main Frame tick loop
 function tick() {
   update();
   draw();
+  updateAndDrawPreviews();
   requestAnimationFrame(tick);
 }
 
